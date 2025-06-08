@@ -292,7 +292,11 @@ function Markdown({ text }: { text: string }) {
   return rendered ?? text;
 }
 
-export default function AISearch(props: DialogProps) {
+export interface AISearchProps extends DialogProps {
+  initialInput?: string;
+}
+
+export default function AISearch(props: AISearchProps) {
   return (
     <Dialog {...props}>
       {props.children}
@@ -306,16 +310,17 @@ export default function AISearch(props: DialogProps) {
           aria-describedby={undefined}
           className="fixed flex flex-col-reverse gap-3 md:flex-col max-md:top-12 md:bottom-12 left-1/2 z-50 w-[98vw] max-w-[860px] -translate-x-1/2 focus-visible:outline-none data-[state=closed]:animate-fd-fade-out"
         >
-          <Content />
+          <Content initialInput={props.initialInput} />
         </DialogContent>
       </DialogPortal>
     </Dialog>
   );
 }
 
-function Content() {
+function Content({ initialInput }: { initialInput?: string }) {
   const chat = useChat({
     id: 'search',
+    api: '/api/rag',
     streamProtocol: 'data',
     sendExtraMessageFields: true,
     onResponse(response) {
@@ -324,6 +329,10 @@ function Content() {
       }
     },
   });
+
+  useEffect(() => {
+    if (initialInput) chat.setInput(initialInput);
+  }, [initialInput]);
 
   return (
     <ChatContext value={chat}>
