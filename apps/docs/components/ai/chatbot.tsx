@@ -13,7 +13,7 @@ import {
 import { Loader2, RefreshCw, Send, ArrowLeft } from 'lucide-react';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { cn } from '@/lib/cn';
-import { buttonVariants } from '../../../../packages/ui/src/components/ui/button';
+import { buttonVariants } from '../ui/button';
 import Link from 'fumadocs-core/link';
 import {
   ScrollArea,
@@ -205,14 +205,18 @@ export default function AIChat({ initialInput, onBack }: AIChatProps) {
       <div className="p-2 bg-fd-secondary/50 rounded-xl">
         <div className="rounded-xl overflow-hidden border shadow-lg bg-fd-popover text-fd-popover-foreground">
           <ChatInput />
-          <div className="flex gap-2 items-center text-fd-muted-foreground px-3 py-1.5">
-            <p className="text-xs flex-1">Powered by OpenAI. Answers may be inaccurate.</p>
+          <div className="flex items-center gap-2 text-fd-muted-foreground px-3 py-1.5">
             {onBack && (
-              <button type="button" className={cn(buttonVariants({ size: 'sm', color: 'ghost' }))} onClick={onBack}>
+              <button
+                type="button"
+                className={cn(buttonVariants({ size: 'sm', color: 'ghost' }))}
+                onClick={onBack}
+              >
                 <ArrowLeft className="size-4" />
                 Back
               </button>
             )}
+            <p className="text-xs ms-auto">Powered by OpenAI. Answers may be inaccurate.</p>
           </div>
         </div>
       </div>

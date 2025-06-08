@@ -13,7 +13,7 @@ import {
 import { Loader2, RefreshCw, Send, X } from 'lucide-react';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { cn } from '@/lib/cn';
-import { buttonVariants } from '../../../../packages/ui/src/components/ui/button';
+import { buttonVariants } from '../ui/button';
 import type { Processor } from './markdown-processor';
 import Link from 'fumadocs-core/link';
 import {
