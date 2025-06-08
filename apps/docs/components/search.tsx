@@ -10,6 +10,7 @@ import {
   SearchDialogIcon,
   SearchDialogInput,
   SearchDialogList,
+  SearchDialogListItem,
   SearchDialogOverlay,
   type SharedProps,
   TagsList,
@@ -17,6 +18,9 @@ import {
 } from 'fumadocs-ui/components/dialog/search';
 import { useDocsSearch } from 'fumadocs-core/search/client';
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
+import { Sparkles } from 'lucide-react';
+const AIChat = dynamic(() => import('./ai/chatbot'), { ssr: false });
 import { useMode } from '@/app/layout.client';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 
@@ -28,6 +32,7 @@ const client = new OramaClient({
 export default function CustomSearchDialog(props: SharedProps) {
   const mode = useMode();
   const [tag, setTag] = useState<string | undefined>(mode);
+  const [chatOpen, setChatOpen] = useState(false);
   const { search, setSearch, query } = useDocsSearch({
     type: 'orama-cloud',
     client,
@@ -39,12 +44,13 @@ export default function CustomSearchDialog(props: SharedProps) {
   });
 
   return (
-    <SearchDialog
-      search={search}
-      onSearchChange={setSearch}
-      isLoading={query.isLoading}
-      {...props}
-    >
+    <> 
+      <SearchDialog
+        search={search}
+        onSearchChange={setSearch}
+        isLoading={query.isLoading}
+        {...props}
+      >
       <SearchDialogOverlay />
       <SearchDialogContent>
         <SearchDialogHeader>
@@ -52,8 +58,42 @@ export default function CustomSearchDialog(props: SharedProps) {
           <SearchDialogInput />
           <SearchDialogClose />
         </SearchDialogHeader>
-        {query.data !== 'empty' && query.data && (
-          <SearchDialogList items={query.data} />
+        {chatOpen ? (
+          <AIChat initialInput={search} onBack={() => setChatOpen(false)} />
+        ) : (
+          query.data !== 'empty' && (
+            <SearchDialogList
+              items={[
+                ...(query.data || []),
+                ...(search
+                  ? [
+                      {
+                        id: '__ai',
+                        type: 'page',
+                        content: `Ask AI about "${search}"`,
+                        url: '#',
+                      } as any,
+                    ]
+                  : []),
+              ]}
+              Item={({ item, onClick }) => {
+                if (item.id === '__ai')
+                  return (
+                    <button
+                      type="button"
+                      className="flex min-h-10 flex-row items-center gap-2.5 rounded-lg px-2 text-start text-sm"
+                      onClick={() => setChatOpen(true)}
+                    >
+                      <Sparkles className="size-4 text-fd-muted-foreground" />
+                      <p className="w-0 flex-1 truncate">{item.content}</p>
+                    </button>
+                  );
+                return (
+                  <SearchDialogListItem item={item} onClick={onClick} />
+                );
+              }}
+            />
+          )
         )}
         <SearchDialogFooter className="flex flex-row">
           <TagsList tag={tag} onTagChange={setTag} allowClear>
@@ -72,5 +112,6 @@ export default function CustomSearchDialog(props: SharedProps) {
         </SearchDialogFooter>
       </SearchDialogContent>
     </SearchDialog>
+    </>
   );
 }
