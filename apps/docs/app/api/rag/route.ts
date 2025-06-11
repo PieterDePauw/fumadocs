@@ -3,12 +3,14 @@ import dotenv from "dotenv";
 import { streamText } from 'ai';
 import { neon, neonConfig } from '@neondatabase/serverless';
 
-dotenv.config({ path: './.env.local' });
+dotenv.config();
+// dotenv.config({ path: './.env' });
+// dotenv.config({ path: './.env.local' });
 
 neonConfig.fetchConnectionCache = true;
 const sql = neon(process.env.DATABASE_URL!);
 
-export const runtime = 'edge';
+// export const runtime = 'edge';
 
 const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -24,8 +26,11 @@ async function createEmbedding(text: string) {
 			input: text,
 		}),
 	});
+	if (!res.ok) {
+		throw new Error(`OpenAI API error: ${res.status} ${res.statusText}`);
+	}
 	const json = await res.json();
-	return json.data[0].embedding as number[];
+	return json.data[0].embedding;
 }
 
 export async function POST(req: Request) {
